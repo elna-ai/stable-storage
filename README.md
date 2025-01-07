@@ -1,0 +1,2 @@
+# stable-storage
+Document store
