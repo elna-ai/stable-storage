@@ -1,0 +1,17 @@
+{
+  "canisters": {
+    "stable_storage": {
+      "candid": "src/stable_storage/stable_storage.did",
+      "package": "stable_storage",
+      "type": "rust"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

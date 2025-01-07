@@ -1,0 +1,22 @@
+type AssetArgs = record { file_name : text; document : Document };
+type Document = record {
+  metadata : vec record { text; text };
+  page_content : text;
+};
+type Error = variant {
+  UnableToReadLastId;
+  NotFound;
+  Unauthorized;
+  UnableToDelete;
+  UnableToUpdate;
+  AnonymousCaller;
+  UploaderMismatch;
+};
+type Result = variant { Ok : nat8; Err : Error };
+type Result_1 = variant { Ok : AssetArgs; Err : Error };
+service : {
+  delete_doc : (nat8) -> (Result);
+  get_doc : (nat8) -> (Result_1) query;
+  insert_doc : (AssetArgs) -> (Result);
+  update_doc : (AssetArgs, nat8) -> (Result);
+}

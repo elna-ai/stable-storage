@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/stable_storage"
+]
+resolver = "2"
