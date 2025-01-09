@@ -14,9 +14,10 @@ type Error = variant {
 };
 type Result = variant { Ok : nat8; Err : Error };
 type Result_1 = variant { Ok : AssetArgs; Err : Error };
-service : {
+service : () -> {
   delete_doc : (nat8) -> (Result);
   get_doc : (nat8) -> (Result_1) query;
+  get_id : () -> (nat8) query;
   insert_doc : (AssetArgs) -> (Result);
   update_doc : (AssetArgs, nat8) -> (Result);
 }

@@ -1,11 +1,39 @@
 mod error;
 mod storage;
+// mod tests;
 
 use crate::error::Error;
 
 use candid::Principal;
 use ic_cdk::export_candid;
-use storage::{Asset, AssetArgs, STORE};
+use storage::{Asset, AssetArgs, STATE, STORE};
+
+#[ic_cdk::init]
+fn init() {
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
+        let result = state.set(0);
+        ic_cdk::println!("{:?}", result);
+    });
+}
+
+// #[ic_cdk::update]
+fn set_id(val: u8) {
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
+        let result = state.set(val);
+        ic_cdk::println!("set_id: {:?}", result)
+    });
+}
+
+#[ic_cdk::query]
+fn get_id() -> u8 {
+    STATE.with(|state| {
+        let state = state.borrow();
+        let result = state.get();
+        *result
+    })
+}
 
 #[ic_cdk::update]
 fn insert_doc(new_asset: AssetArgs) -> Result<u8, Error> {
@@ -17,12 +45,12 @@ fn insert_doc(new_asset: AssetArgs) -> Result<u8, Error> {
 
     STORE.with(|store| {
         let mut store = store.borrow_mut();
-        let len: u8 = store.len().try_into().unwrap();
-        let id = len + 1;
+        let last_id: u8 = get_id();
+        let new_id = last_id + 1;
         let asset = Asset::from((new_asset, caller));
-
-        store.insert(id.clone(), asset);
-        Ok(id)
+        store.insert(new_id.clone(), asset);
+        set_id(new_id);
+        Ok(new_id)
     })
 }
 

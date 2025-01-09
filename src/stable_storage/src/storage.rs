@@ -1,29 +1,30 @@
 // use std::borrow::Cow;
 
-use candid::{CandidType, Decode, Deserialize, Encode, Principal};
-use ic_stable_structures::StableBTreeMap;
+use candid::{CandidType, Decode, Deserialize, Encode, Nat, Principal};
+use ic_cdk::api::stable::StableMemory;
 use ic_stable_structures::{storable::Bound, Storable};
+use ic_stable_structures::{StableBTreeMap, StableCell};
 use serde::Serialize;
 
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::DefaultMemoryImpl;
 use std::borrow::Cow;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 // // A memory for upgrades, where data from the heap can be serialized/deserialized.
 const STORE_MEM: MemoryId = MemoryId::new(0);
-// const STATE_MEM: MemoryId = MemoryId::new(1);
+const STATE_MEM: MemoryId = MemoryId::new(1);
 
 fn get_store_memory() -> Memory {
     MEMORY_MANAGER.with(|m| m.borrow().get(STORE_MEM))
 }
 
-// fn get_state_memory() -> Memory {
-//     MEMORY_MANAGER.with(|m| m.borrow().get(STATE_MEM))
-// }
+fn get_state_memory() -> Memory {
+    MEMORY_MANAGER.with(|m| m.borrow().get(STATE_MEM))
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, CandidType)]
 pub struct Document {
@@ -51,8 +52,8 @@ pub struct Asset {
 
 #[derive(CandidType, Deserialize)]
 pub struct AssetArgs {
-    document: Document,
-    file_name: String,
+    pub(crate) document: Document,
+    pub(crate) file_name: String,
 }
 
 impl From<(AssetArgs, Principal)> for Asset {
@@ -97,8 +98,12 @@ thread_local! {
     );
 
 
-    // pub static USERS: RefCell<StableBTreeMap<String,Principal,Memory>> =  RefCell::new(
-    //     StableBTreeMap::init(get_state_memory())
-    // );
+    pub static STATE: RefCell<StableCell<u8, Memory>> = RefCell::new(
+        StableCell::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(STATE_MEM)),
+            0 // Default value for initialization
+        ).expect("Failed to initialize StableCell")
+    );
+
 
 }
